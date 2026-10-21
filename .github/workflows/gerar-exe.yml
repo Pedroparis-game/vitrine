@@ -1,0 +1,33 @@
+# Gera o Vitrine.exe (Windows) sozinho a cada envio para o GitHub.
+# Depois de rodar: aba Actions > último "Gerar Vitrine.exe" > Artifacts > Vitrine-windows.
+name: Gerar Vitrine.exe
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Montar o executável
+        shell: pwsh
+        run: |
+          node --experimental-sea-config sea-config.json
+          Copy-Item (Get-Command node).Source Vitrine.exe
+          npx --yes postject Vitrine.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+      - name: Testar se abre
+        shell: pwsh
+        run: |
+          $env:NO_OPEN = "1"; $env:PORT = "5180"
+          $p = Start-Process .\Vitrine.exe -PassThru
+          Start-Sleep -Seconds 3
+          $r = Invoke-WebRequest http://127.0.0.1:5180/ -UseBasicParsing
+          Stop-Process $p
+          if ($r.Content -notmatch "Vitrine") { throw "O site não respondeu" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Vitrine-windows
+          path: Vitrine.exe

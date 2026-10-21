@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--BODY-START-->
+<title>Vitrine de Skins</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<!--HEAD-END-->
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar__in">
+    <a class="brand" href="#loja" aria-label="Vitrine, início">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18l-2 5H5z M5 11h14v9H5z M9 14h6v6H9z" fill="currentColor"/></svg>
+      <span>Vitrine</span>
+    </a>
+    <div class="account" id="account" hidden>
+      <div class="wallet" id="wallet"></div>
+      <div class="who">
+        <span class="who__name" id="whoName"></span>
+        <button class="linkbtn" id="logoutBtn" type="button">Sair</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="demo-note" id="demoNote" hidden>
+  <div class="wrap">
+    <strong>Prévia com dados de exemplo.</strong>
+    <span id="demoNoteText">Conecte sua conta para ver a sua loja de verdade.</span>
+    <button class="linkbtn" id="demoConnect" type="button">Conectar conta</button>
+  </div>
+</div>
+
+<main class="wrap" id="main">
+
+  <!-- CONECTAR -->
+  <section class="connect" id="viewConnect" hidden>
+    <div class="connect__intro">
+      <p class="eyebrow">Loja do Valorant no navegador</p>
+      <h1>Veja sua loja do dia sem abrir o jogo.</h1>
+      <p class="lede">Entre na página oficial da Riot e você volta pra cá com a loja aberta. Sua senha fica só com a Riot.</p>
+    </div>
+
+    <a class="btn btn--solid btn--big" id="riotLink" href="https://auth.riotgames.com/authorize?redirect_uri=http%3A%2F%2Flocalhost%2Fredirect&amp;client_id=riot-client&amp;response_type=token%20id_token&amp;nonce=1&amp;scope=openid%20link%20ban%20lol_region%20account">Entrar com a conta Riot</a>
+    <p class="form-msg" id="connectMsg" role="status"></p>
+
+    <details class="fallback" id="fallback">
+      <summary id="fallbackTitle">Não voltou pra cá sozinho?</summary>
+      <form id="connectForm" class="connect__form">
+        <p id="fallbackText">Se depois do login apareceu uma página de erro dizendo que não foi possível acessar o localhost, está tudo certo: copie o endereço dessa página e cole aqui.</p>
+        <label for="tokenUrl">Endereço da página de erro</label>
+        <textarea id="tokenUrl" rows="3" placeholder="http://localhost/redirect#access_token=..." required></textarea>
+        <div class="row">
+          <div class="field">
+            <label for="region">Região</label>
+            <select id="region">
+              <option value="auto">Detectar automaticamente</option>
+              <option value="br">Brasil</option>
+              <option value="latam">América Latina</option>
+              <option value="na">América do Norte</option>
+              <option value="eu">Europa</option>
+              <option value="ap">Ásia-Pacífico</option>
+              <option value="kr">Coreia</option>
+            </select>
+          </div>
+          <button class="btn" type="submit" id="connectBtn">Ver minha loja</button>
+        </div>
+      </form>
+    </details>
+
+    <p class="fine">O acesso vale cerca de 1 hora. Depois é só clicar em Entrar de novo. Ative a verificação em duas etapas na sua conta Riot. Projeto pessoal, sem ligação com a Riot Games.</p>
+    <button class="linkbtn" id="demoBtn" type="button">Ver uma demonstração sem conectar</button>
+  </section>
+
+  <!-- APP -->
+  <section id="viewApp" hidden>
+    <nav class="tabs" role="tablist" aria-label="Seções">
+      <button role="tab" data-tab="loja" aria-selected="true">Loja do dia</button>
+      <button role="tab" data-tab="pacote">Pacote</button>
+      <button role="tab" data-tab="noturno" id="tabNight">Mercado Noturno</button>
+      <button role="tab" data-tab="colecao">Coleção</button>
+    </nav>
+
+    <div class="panel" id="panel-loja" role="tabpanel">
+      <div class="panel__head">
+        <h2>Loja do dia</h2>
+        <div class="sign"><span>Renova em</span><b class="clock" data-clock="daily">--:--:--</b></div>
+      </div>
+      <div class="tags tags--4" id="dailyGrid"></div>
+    </div>
+
+    <div class="panel" id="panel-pacote" role="tabpanel" hidden>
+      <div id="bundleBox"></div>
+    </div>
+
+    <div class="panel" id="panel-noturno" role="tabpanel" hidden>
+      <div class="panel__head">
+        <h2>Mercado Noturno</h2>
+        <div class="sign" id="nightSign"><span>Fecha em</span><b class="clock" data-clock="night">--:--:--</b></div>
+      </div>
+      <div id="nightBox"></div>
+    </div>
+
+    <div class="panel" id="panel-colecao" role="tabpanel" hidden>
+      <div class="panel__head">
+        <h2>Coleção</h2>
+        <p class="count" id="ownedCount"></p>
+      </div>
+      <div class="filters">
+        <input type="search" id="search" placeholder="Buscar skin" aria-label="Buscar skin">
+        <div class="chips" id="weaponChips"></div>
+      </div>
+      <div class="tags tags--small" id="ownedGrid"></div>
+    </div>
+  </section>
+
+  <div class="loading" id="loading" hidden><span></span>Carregando a vitrine…</div>
+</main>
+
+<dialog class="detail" id="detail" aria-labelledby="detailName">
+  <div class="detail__in" id="detailIn"></div>
+</dialog>
+
+<footer class="foot wrap">Imagens e nomes das skins: valorant-api.com. Valorant é marca da Riot Games. Projeto de fã, não oficial.</footer>
+
+<script src="app.js"></script>
+<!--BODY-END-->
+</body>
+</html>

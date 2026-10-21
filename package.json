@@ -1,0 +1,13 @@
+{
+  "name": "vitrine",
+  "version": "1.0.0",
+  "description": "Veja sua loja e suas skins do Valorant no navegador. Projeto pessoal, não oficial.",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
