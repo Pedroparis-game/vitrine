@@ -31,6 +31,7 @@
 
   /* ---------------- API ---------------- */
   async function api(path, opts = {}) {
+    if (window.VITRINE_API) return window.VITRINE_API(path, opts); // app Android
     const res = await fetch(path, { credentials: "same-origin", headers: { "Content-Type": "application/json" }, ...opts });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) throw Object.assign(new Error(body.error || `Erro ${res.status}`), { status: res.status });

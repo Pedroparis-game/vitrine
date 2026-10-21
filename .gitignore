@@ -1,4 +1,14 @@
 node_modules/
 sea-prep.blob
 Vitrine.exe
+Vitrine.apk
 preview.html
+build.log
+# cópias do site geradas na hora de montar o app
+android/app/src/main/assets/index.html
+android/app/src/main/assets/style.css
+android/app/src/main/assets/app.js
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties

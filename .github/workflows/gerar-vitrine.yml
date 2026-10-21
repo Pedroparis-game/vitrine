@@ -1,0 +1,94 @@
+# Gera o Vitrine.exe (Windows) e o Vitrine.apk (Android) a cada envio para o GitHub
+# e publica os dois em: https://github.com/Pedroparis-game/vitrine/releases/latest
+name: Gerar Vitrine
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Montar o executável
+        shell: pwsh
+        run: |
+          node --experimental-sea-config sea-config.json
+          Copy-Item (Get-Command node).Source Vitrine.exe
+          npx --yes postject Vitrine.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+      - name: Testar se abre
+        shell: pwsh
+        run: |
+          $env:NO_OPEN = "1"; $env:PORT = "5180"
+          $p = Start-Process .\Vitrine.exe -PassThru
+          Start-Sleep -Seconds 3
+          $r = Invoke-WebRequest http://127.0.0.1:5180/ -UseBasicParsing
+          Stop-Process $p
+          if ($r.Content -notmatch "Vitrine") { throw "O site não respondeu" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Vitrine-windows
+          path: Vitrine.exe
+
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Copiar o site para dentro do app
+        run: |
+          A=android/app/src/main/assets
+          cp public/index.html public/style.css public/app.js "$A/"
+          sed -i 's|<script src="app.js"></script>|<script src="mobile.js"></script>\n<script src="app.js"></script>|' "$A/index.html"
+          grep -q 'src="mobile.js"' "$A/index.html"
+      - name: Montar o APK
+        run: |
+          set -o pipefail
+          gradle -p android assembleRelease --no-daemon 2>&1 | tee build.log
+      - name: Mostrar erros
+        if: failure()
+        run: |
+          grep -E -A4 "^e: |What went wrong|error:" build.log | grep -v "^--$" | head -40 | while IFS= read -r l; do
+            [ -n "$l" ] && echo "::error::${l//%/%25}"
+          done
+      - run: cp android/app/build/outputs/apk/release/app-release.apk Vitrine.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Vitrine-android
+          path: Vitrine.apk
+
+  publicar:
+    needs: [exe, apk]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Vitrine ${{ github.run_number }}
+          make_latest: true
+          files: |
+            Vitrine.exe
+            Vitrine.apk
+          body: |
+            **Android:** baixe o `Vitrine.apk` e abra o arquivo no celular para instalar.
+            **Windows:** baixe o `Vitrine.exe` e dê dois cliques.
+
+            Links que sempre apontam para a versão mais nova:
+            - https://github.com/${{ github.repository }}/releases/latest/download/Vitrine.apk
+            - https://github.com/${{ github.repository }}/releases/latest/download/Vitrine.exe
