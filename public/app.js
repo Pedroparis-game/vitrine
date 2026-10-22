@@ -229,15 +229,22 @@
   }
 
   /* ---------------- visões ---------------- */
+  // Nunca fica girando para sempre: depois de 25 s mostra "Tentar de novo" e "Sair da conta".
+  let slowTimer = null;
   function view(which) {
     $("#viewConnect").hidden = which !== "connect";
     $("#viewApp").hidden = which !== "app";
     $("#loading").hidden = which !== "loading";
     if (which !== "app") $("#account").hidden = true;
+    clearTimeout(slowTimer);
+    $("#slow").hidden = true;
+    if (which === "loading") slowTimer = setTimeout(() => { $("#slow").hidden = false; }, 25000);
   }
+  function loadingText(t) { $("#loadingText").textContent = t; }
 
   async function loadLive() {
     view("loading");
+    loadingText("Buscando sua loja…");
     const [cat, data, owned] = await Promise.all([api("/api/catalog"), api("/api/store"), api("/api/owned").catch(() => ({ items: [] }))]);
     indexCatalog(cat);
     state.mode = "live"; state.data = data; state.owned = owned.items || [];
@@ -248,6 +255,7 @@
   // Demonstração: usa os dados embutidos (prévia) ou monta uma loja aleatória a partir do catálogo real.
   async function loadDemo() {
     view("loading");
+    loadingText("Montando a demonstração…");
     let demo = window.VITRINE_DEMO;
     if (!demo) {
       const cat = await api("/api/catalog");
@@ -292,12 +300,13 @@
     if (window.VITRINE_DEMO) return loadDemo();
     setupLogin();
     view("loading");
+    loadingText("Conectando…");
     try {
       state.me = await api("/api/me");
       await loadLive();
     } catch (e) {
       view("connect");
-      if (e.status && e.status !== 401) $("#connectMsg").textContent = e.message;
+      if (e.message && e.status !== 401) $("#connectMsg").textContent = e.message;
     }
   }
 
@@ -344,6 +353,11 @@
     state.me = null; $("#demoNote").hidden = true; view("connect");
   });
   $("#demoBtn").addEventListener("click", () => loadDemo().catch((e) => { view("connect"); $("#connectMsg").textContent = e.message; }));
+  $("#retryBtn").addEventListener("click", () => location.reload());
+  $("#resetBtn").addEventListener("click", async () => {
+    await api("/api/logout", { method: "POST" }).catch(() => {});
+    location.reload();
+  });
   $("#demoConnect").addEventListener("click", () => { $("#demoNote").hidden = true; view("connect"); });
 
   boot();

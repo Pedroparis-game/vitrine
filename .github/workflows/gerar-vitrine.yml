@@ -70,8 +70,41 @@ jobs:
           name: Vitrine-android
           path: Vitrine.apk
 
+  teste-android:
+    needs: apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: Vitrine-android
+      - name: Ligar a aceleração do emulador
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Testar num Android 14 emulado
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash android/teste-emulador.sh
+      - name: Guardar o resultado na branch "testes"
+        if: always()
+        run: |
+          mkdir -p resultado-teste && cd resultado-teste
+          echo "run ${{ github.run_number }} commit ${{ github.sha }}" > INFO.txt
+          git init -q && git checkout -q -b testes
+          git add -A
+          git -c user.name="teste-automatico" -c user.email="teste@vitrine" commit -qm "Teste ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" testes
+
   publicar:
-    needs: [exe, apk]
+    needs: [exe, apk, teste-android]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

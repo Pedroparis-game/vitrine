@@ -9,6 +9,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
+import android.util.Log
+import android.webkit.ConsoleMessage
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -37,7 +42,13 @@ class MainActivity : Activity() {
         // A ponte só aceita estes domínios. O resto da internet fica de fora.
         private val ALLOWED = listOf("riotgames.com", "pvp.net", "valorant-api.com")
         private const val BG = "#11151B"
+        private const val TAG = "Vitrine"
     }
+
+    private var autotest = false
+
+    /** Endereço sem a parte depois do # e do ?, para nunca registrar tokens. */
+    private fun clean(url: String?) = (url ?: "").substringBefore('#').substringBefore('?')
 
     private lateinit var web: WebView
     private val io = Executors.newFixedThreadPool(4)
@@ -72,6 +83,15 @@ class MainActivity : Activity() {
             }
         }
 
+        autotest = intent?.getBooleanExtra("autotest", false) == true
+
+        web.webChromeClient = object : WebChromeClient() {
+            override fun onConsoleMessage(m: ConsoleMessage): Boolean {
+                Log.i(TAG, "js: ${m.message()}")
+                return true
+            }
+        }
+
         web.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
                 assets.shouldInterceptRequest(request.url)
@@ -89,11 +109,29 @@ class MainActivity : Activity() {
             }
 
             override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+                Log.i(TAG, "página: ${clean(url)}")
                 if (isLoginReturn(url)) { view.stopLoading(); catchLogin(url) }
+            }
+
+            override fun onPageFinished(view: WebView, url: String) {
+                Log.i(TAG, "carregou: ${clean(url)}")
+                // No teste automático, registra o que a página de login da Riot mostra.
+                if (autotest && (Uri.parse(url).host ?: "").endsWith("riotgames.com")) {
+                    main.postDelayed({
+                        view.evaluateJavascript("(document.title + ' | ' + (document.body ? document.body.innerText : '')).replace(/\\s+/g,' ').slice(0,300)") {
+                            Log.i(TAG, "riot mostra: $it")
+                        }
+                    }, 6000)
+                }
+            }
+
+            override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+                if (request.isForMainFrame) Log.w(TAG, "erro ao abrir ${clean(request.url.toString())}: ${error.errorCode} ${error.description}")
             }
         }
 
-        web.loadUrl(HOME)
+        Log.i(TAG, "abrindo (autoteste=$autotest, ponte=${WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)})")
+        web.loadUrl(if (autotest) "$HOME?autotest=1" else HOME)
     }
 
     private fun isLoginReturn(url: String) =
@@ -104,6 +142,7 @@ class MainActivity : Activity() {
     private fun catchLogin(url: String): Boolean {
         if (!isLoginReturn(url)) return false
         val fragment = url.substringAfter('#', "")
+        Log.i(TAG, "login voltou (com acesso: ${fragment.contains("access_token")})")
         web.loadUrl(if (fragment.isNotEmpty()) "$HOME#$fragment" else "$HOME#erro-login")
         return true
     }
@@ -112,6 +151,8 @@ class MainActivity : Activity() {
     private fun handle(data: String, reply: JavaScriptReplyProxy) {
         io.execute {
             val out = JSONObject()
+            val t0 = SystemClock.elapsedRealtime()
+            var what = ""
             try {
                 val req = JSONObject(data)
                 out.put("id", req.optInt("id"))
@@ -128,6 +169,7 @@ class MainActivity : Activity() {
                     if (url.protocol != "https" || ALLOWED.none { host == it || host.endsWith(".$it") }) {
                         throw IllegalArgumentException("Endereço não permitido")
                     }
+                    what = "${req.optString("method", "GET")} ${url.host}${url.path}"
                     val conn = url.openConnection() as HttpURLConnection
                     conn.requestMethod = req.optString("method", "GET")
                     conn.connectTimeout = 15000
@@ -145,12 +187,19 @@ class MainActivity : Activity() {
                     conn.disconnect()
                     out.put("status", code)
                     out.put("body", text)
+                    Log.i(TAG, "http $what -> $code em ${SystemClock.elapsedRealtime() - t0}ms (${text.length} caracteres)")
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
+                // Qualquer erro (até falta de memória) vira resposta, para o app nunca ficar esperando.
+                Log.w(TAG, "http $what falhou: ${e.javaClass.simpleName} ${e.message}")
+                out.remove("body")
                 out.put("status", 0)
-                out.put("error", e.message ?: "Erro de rede")
+                out.put("error", e.message ?: e.javaClass.simpleName)
             }
-            main.post { reply.postMessage(out.toString()) }
+            val msg = try { out.toString() } catch (e: Throwable) {
+                "{\"id\":${out.optInt("id")},\"status\":0,\"error\":\"Resposta grande demais\"}"
+            }
+            main.post { try { reply.postMessage(msg) } catch (e: Throwable) { Log.w(TAG, "não consegui responder: ${e.message}") } }
         }
     }
 

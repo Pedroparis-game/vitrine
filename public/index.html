@@ -120,7 +120,16 @@
     </div>
   </section>
 
-  <div class="loading" id="loading" hidden><span></span>Carregando a vitrine…</div>
+  <div class="loading-box" id="loading" hidden>
+    <div class="loading"><span></span><b id="loadingText">Carregando a vitrine…</b></div>
+    <div class="slow" id="slow" hidden>
+      <p>Está demorando mais que o normal. Pode ser a internet ou a Riot respondendo devagar.</p>
+      <div class="row">
+        <button class="btn btn--solid" type="button" id="retryBtn">Tentar de novo</button>
+        <button class="btn" type="button" id="resetBtn">Sair da conta</button>
+      </div>
+    </div>
+  </div>
 </main>
 
 <dialog class="detail" id="detail" aria-labelledby="detailName">
