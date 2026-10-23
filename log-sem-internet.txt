@@ -1,0 +1,49 @@
+--------- beginning of main
+10-23 22:42:23.442  6246  6246 I Vitrine : abrindo (autoteste=false, ponte=true)
+10-23 22:42:23.850  6246  6246 I Vitrine : página: https://appassets.androidplatform.net/assets/index.html
+10-23 22:42:24.953  6246  6246 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+10-23 22:42:28.217  6246  6246 I Vitrine : abrindo (autoteste=true, ponte=true)
+10-23 22:42:28.716  6246  6246 I Vitrine : página: https://appassets.androidplatform.net/assets/index.html
+10-23 22:42:28.764  6246  6246 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+10-23 22:42:30.231  6246  6246 I Vitrine : js: [autotest] ponte nativa: sim
+10-23 22:42:30.232  6246  6246 I Vitrine : js: [autotest] tela inicial: viewConnect
+10-23 22:42:30.238  6246  6246 I Vitrine : js: [vitrine] direto falhou, usando a ponte: Failed to fetch
+10-23 22:42:30.245  6246  6395 W Vitrine : http GET valorant-api.com/v1/version falhou: UnknownHostException Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.255  6246  6246 I Vitrine : js: [vitrine] falha de rede GET https://valorant-api.com/v1/version Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.256  6246  6246 I Vitrine : js: [autotest] FALHOU versão do cliente (valorant-api) 23ms status=0 Sem conexão com a internet. Confira o Wi-Fi ou os dados móveis.
+10-23 22:42:30.257  6246  6397 W Vitrine : http GET valorant-api.com/v1/version falhou: UnknownHostException Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.289  6246  6246 I Vitrine : js: [vitrine] falha de rede GET https://valorant-api.com/v1/version Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.289  6246  6246 I Vitrine : js: [autotest] FALHOU versão pela ponte 16ms status=0 Sem conexão com a internet. Confira o Wi-Fi ou os dados móveis.
+10-23 22:42:30.305  6246  6246 I Vitrine : js: [vitrine] direto falhou, usando a ponte: Failed to fetch
+10-23 22:42:30.306  6246  6246 I Vitrine : js: [vitrine] direto falhou, usando a ponte: Failed to fetch
+10-23 22:42:30.306  6246  6400 W Vitrine : http GET valorant-api.com/v1/weapons falhou: UnknownHostException Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.306  6246  6401 W Vitrine : http GET valorant-api.com/v1/contenttiers falhou: UnknownHostException Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.307  6246  6246 I Vitrine : js: [vitrine] falha de rede GET https://valorant-api.com/v1/weapons Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.307  6246  6246 I Vitrine : js: [autotest] FALHOU catálogo completo 34ms status=0 Sem conexão com a internet. Confira o Wi-Fi ou os dados móveis.
+10-23 22:42:30.307  6246  6246 I Vitrine : js: [autotest] OK   catálogo guardado no celular 0ms NÃO (sem espaço)
+10-23 22:42:30.308  6246  6246 I Vitrine : js: [vitrine] falha de rede GET https://valorant-api.com/v1/contenttiers Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.310  6246  6246 I Vitrine : js: [vitrine] direto falhou, usando a ponte: Failed to fetch
+10-23 22:42:30.310  6246  6395 W Vitrine : http GET valorant-api.com/v1/version falhou: UnknownHostException Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.310  6246  6246 I Vitrine : js: [vitrine] falha de rede GET https://valorant-api.com/v1/version Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.311  6246  6246 I Vitrine : js: [autotest] FALHOU Riot sem login responde (espera 400/401) 3ms status=0 Sem conexão com a internet. Confira o Wi-Fi ou os dados móveis.
+10-23 22:42:30.312  6246  6397 W Vitrine : http POST entitlements.auth.riotgames.com/api/token/v1 falhou: UnknownHostException Unable to resolve host "entitlements.auth.riotgames.com": No address associated with hostname
+10-23 22:42:30.312  6246  6246 I Vitrine : js: [vitrine] falha de rede POST https://entitlements.auth.riotgames.com/api/token/v1 Unable to resolve host "entitlements.auth.riotgames.com": No address associated with hostname
+10-23 22:42:30.312  6246  6246 I Vitrine : js: [autotest] FALHOU entitlements sem token (espera 401/403) 2ms status=0 Sem conexão com a internet. Confira o Wi-Fi ou os dados móveis.
+10-23 22:42:30.312  6246  6400 W Vitrine : http  falhou: IllegalArgumentException Endereço não permitido
+10-23 22:42:30.313  6246  6246 I Vitrine : js: [autotest] OK   ponte recusa site fora da lista 1ms recusou
+10-23 22:42:30.313  6246  6401 W Vitrine : http GET valorant-api.com/v1/version falhou: UnknownHostException Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.313  6246  6246 I Vitrine : js: [autotest] OK   limite de tempo funciona 0ms não esperou?
+10-23 22:42:30.314  6246  6246 I Vitrine : js: [vitrine] renovação automática bloqueada tentativa recente
+10-23 22:42:30.314  6246  6246 I Vitrine : js: [autotest] OK   relogin bloqueado se repetido 1ms bloqueou (440)
+10-23 22:42:30.318  6246  6246 I Vitrine : js: [vitrine] direto falhou, usando a ponte: Failed to fetch
+10-23 22:42:30.318  6246  6395 W Vitrine : http GET valorant-api.com/v1/weapons falhou: UnknownHostException Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.319  6246  6246 I Vitrine : js: [vitrine] direto falhou, usando a ponte: Failed to fetch
+10-23 22:42:30.319  6246  6397 W Vitrine : http GET valorant-api.com/v1/contenttiers falhou: UnknownHostException Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.323  6246  6246 I Vitrine : js: [vitrine] falha de rede GET https://valorant-api.com/v1/weapons Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:30.323  6246  6246 I Vitrine : js: [vitrine] falha de rede GET https://valorant-api.com/v1/contenttiers Unable to resolve host "valorant-api.com": No address associated with hostname
+10-23 22:42:40.328  6246  6246 I Vitrine : js: [autotest] FALHOU demonstração abre 10014ms status=undefined não abriu
+10-23 22:42:52.329  6246  6246 I Vitrine : js: [autotest] indo para o login da Riot
+10-23 22:42:52.335  6246  6246 I Vitrine : página: https://auth.riotgames.com/authorize
+10-23 22:42:52.335  6246  6246 W Vitrine : erro ao abrir https://auth.riotgames.com/authorize: -2 net::ERR_NAME_NOT_RESOLVED
+10-23 22:42:52.335  6246  6246 I Vitrine : carregou: https://auth.riotgames.com/authorize
+10-23 22:42:58.338  6246  6246 I Vitrine : riot mostra: "Webpage not available | Webpage not available The webpage at https://auth.riotgames.com/authorize?redirect_uri=http%3A%2F%2Flocalhost%2Fredirect&client_id=riot-client&response_type=token%20id_token&nonce=1&scope=openid%20link%20ban%20lol_region%20account could not be loaded because: net::ERR_NAME_NO"

@@ -1,0 +1,29 @@
+--------- beginning of main
+10-23 22:40:36.426  3172  3172 I Vitrine : abrindo (autoteste=true, ponte=true)
+10-23 22:40:37.069  3172  3172 I Vitrine : página: https://appassets.androidplatform.net/assets/index.html
+10-23 22:40:38.431  3172  3172 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+10-23 22:40:38.821  3172  3172 I Vitrine : js: [autotest] ponte nativa: sim
+10-23 22:40:38.827  3172  3172 I Vitrine : js: [autotest] tela inicial: viewConnect
+10-23 22:40:39.463  3172  3172 I Vitrine : js: [autotest] OK   versão do cliente (valorant-api) 635ms release-13.08-shipping-20-5715960
+10-23 22:40:39.575  3172  3766 I Vitrine : http GET valorant-api.com/v1/version -> 200 em 111ms (363 caracteres)
+10-23 22:40:39.579  3172  3172 I Vitrine : js: [autotest] OK   versão pela ponte 116ms release-13.08-shipping-20-5715960
+10-23 22:40:40.098  3172  3172 I Vitrine : js: [vitrine] catálogo baixado em 518 ms
+10-23 22:40:40.309  3172  3172 I Vitrine : js: [autotest] OK   catálogo completo 666ms 1411 skins, 21 armas
+10-23 22:40:40.318  3172  3172 I Vitrine : js: [autotest] OK   catálogo guardado no celular 66ms sim
+10-23 22:40:40.588  3172  3802 I Vitrine : http GET pd.na.a.pvp.net/store/v1/offers/ -> 400 em 264ms (119 caracteres)
+10-23 22:40:40.596  3172  3172 I Vitrine : js: [autotest] OK   Riot sem login responde (espera 400/401) 277ms respondeu 400
+10-23 22:40:40.789  3172  3815 I Vitrine : http POST entitlements.auth.riotgames.com/api/token/v1 -> 401 em 190ms (145 caracteres)
+10-23 22:40:40.790  3172  3172 I Vitrine : js: [autotest] OK   entitlements sem token (espera 401/403) 194ms respondeu 401
+10-23 22:40:40.799  3172  3837 W Vitrine : http  falhou: IllegalArgumentException Endereço não permitido
+10-23 22:40:40.800  3172  3172 I Vitrine : js: [autotest] OK   ponte recusa site fora da lista 11ms recusou
+10-23 22:40:40.828  3172  3766 I Vitrine : http GET valorant-api.com/v1/version -> 200 em 28ms (363 caracteres)
+10-23 22:40:40.834  3172  3172 I Vitrine : js: [autotest] OK   limite de tempo funciona 29ms não esperou?
+10-23 22:40:40.835  3172  3172 I Vitrine : js: [vitrine] renovação automática bloqueada tentativa recente
+10-23 22:40:40.835  3172  3172 I Vitrine : js: [autotest] OK   relogin bloqueado se repetido 0ms bloqueou (440)
+10-23 22:40:41.202  3172  3172 I Vitrine : js: [autotest] OK   demonstração abre 364ms 4 etiquetas na loja
+10-23 22:40:53.203  3172  3172 I Vitrine : js: [autotest] indo para o login da Riot
+10-23 22:40:53.646  3172  3172 I Vitrine : página: https://authenticate.riotgames.com/
+10-23 22:40:56.712  3172  3172 I Vitrine : carregou: https://authenticate.riotgames.com/
+10-23 22:40:57.871  3172  3172 I Vitrine : js: Uncaught (in promise) Could not clear consent from root domain.
+10-23 22:41:01.375  3172  3172 I Vitrine : js: undefined
+10-23 22:41:02.720  3172  3172 I Vitrine : riot mostra: "Sign in | This website utilizes technologies such as cookies to enable essential site functionality, as well as for analytics, personalization, and targeted advertising. Privacy Notice Accept Deny Non-Essential Manage Preferences Sign in USERNAME USERNAME PASSWORD PASSWORD Stay signed in CAN'T SIGN "
