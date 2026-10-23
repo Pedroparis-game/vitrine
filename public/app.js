@@ -20,6 +20,7 @@
     byId: new Map(),        // uuid da skin → skin
     data: null,             // { daily, bundles, night, wallet }
     owned: [],
+    loadout: null,          // o que está equipado (como no inventário do jogo)
     me: null,
     deadlines: {},          // nome do relógio → timestamp final
     loadedAt: 0,            // quando os dados chegaram (base dos relógios)
@@ -184,24 +185,70 @@
       || `<p class="empty">${all.length ? "Nenhuma skin com esse filtro." : "Nenhuma skin comprada ainda."}</p>`;
   }
 
+  /* ---------------- inventário (igual ao do jogo) ---------------- */
+  const CATS = [["Sidearm", "Pistolas"], ["SMG", "Submetralhadoras"], ["Shotgun", "Escopetas"], ["Rifle", "Fuzis"],
+    ["Sniper", "Fuzis de precisão"], ["Heavy", "Metralhadoras"], ["Melee", "Corpo a corpo"]];
+
+  // Skin equipada numa arma; sem nada equipado (ou com a padrão) mostra a arma padrão.
+  function equipped(wd) {
+    const g = state.loadout?.guns?.find((x) => x.weapon === wd.id);
+    const skin = g ? state.byId.get(g.skin) || state.byLevel.get(g.skin) : null;
+    const isDefault = !skin || skin.id === wd.def;
+    const chroma = !isDefault && g?.chroma ? (skin.c || []).find((c) => c.id === g.chroma) : null;
+    const base = !isDefault && chroma && skin.c?.[0]?.id !== chroma.id ? chroma : null; // cor diferente da original
+    return { g, skin: isDefault ? null : skin, chroma: base, img: isDefault ? wd.icon : (base?.i || skin.i || wd.icon), buddy: g?.buddy };
+  }
+
+  function slotHTML(wd) {
+    const e = equipped(wd);
+    const t = e.skin && state.catalog.tiers[e.skin.t] ? tierOf(e.skin) : null; // skins de passe não têm raridade
+    const name = e.skin ? e.skin.n : "Padrão";
+    const tag = e.skin ? "button" : "div";
+    return `<${tag} class="slot${e.skin ? "" : " slot--default"}"${e.skin ? ` type="button" data-skin="${esc(e.skin.id)}" data-eqchroma="${esc(e.g?.chroma || "")}"` : ""} style="--tier:${esc(t ? t.color : e.skin ? "#6fa8a0" : "#8a94a3")}">
+      <div class="slot__art">${art(e.img, name, wd.id)}${e.buddy?.i ? `<img class="slot__buddy" src="${esc(e.buddy.i)}" alt="Chaveiro ${esc(e.buddy.n)}" title="${esc(e.buddy.n)}" loading="lazy">` : ""}</div>
+      <div class="slot__body">
+        <span class="slot__weapon">${esc(wd.name)}${t ? ` · ${esc(t.name)}` : ""}</span>
+        <span class="slot__name">${esc(name)}</span>
+        ${e.chroma ? `<span class="slot__chroma">${esc(e.chroma.n)}</span>` : ""}
+      </div></${tag}>`;
+  }
+
+  function renderInventory() {
+    const box = $("#invBox");
+    const lo = state.loadout;
+    if (!lo) { box.innerHTML = `<p class="empty">Não deu para buscar o que está equipado agora. As skins que você tem aparecem abaixo.</p>`; return; }
+    const ws = state.catalog.weapons.filter((w) => w.cat);
+    const ident = `<div class="ident"${lo.card?.wide ? ` style="background-image:url('${esc(lo.card.wide)}')"` : ""}>
+        <div><p class="ident__name">${esc(state.me?.name || "")}<i>#${esc(state.me?.tag || "")}</i></p>
+        ${lo.title ? `<p class="ident__title">${esc(lo.title)}</p>` : ""}</div>
+        ${lo.sprays?.length ? `<div class="sprays">${lo.sprays.map((x) => `<img src="${esc(x.i)}" alt="Spray ${esc(x.n)}" title="${esc(x.n)}" loading="lazy">`).join("")}</div>` : ""}
+        ${lo.level != null ? `<span class="ident__lvl"><small>Nível</small>${fmt(lo.level)}</span>` : ""}
+      </div>`;
+    box.innerHTML = ident + `<div class="inv">${CATS.map(([cat, label]) => {
+      const list = ws.filter((w) => w.cat === cat).sort((a, b) => (a.cost || 0) - (b.cost || 0));
+      return list.length ? `<section class="inv__cat"><h4>${label}</h4><div class="inv__grid">${list.map(slotHTML).join("")}</div></section>` : "";
+    }).join("")}</div>`;
+  }
+
   function renderAll() {
     state.loadedAt = Date.now(); state.revealed = new Set();
-    renderWallet(); renderDaily(); renderBundle(); renderNight(); renderOwned(); tick();
+    renderWallet(); renderDaily(); renderBundle(); renderNight(); renderInventory(); renderOwned(); tick();
   }
 
   /* ---------------- detalhe ---------------- */
-  function openDetail(id) {
+  function openDetail(id, chromaId) {
     const s = state.byId.get(id);
     if (!s) return;
     const t = tierOf(s);
     const chromas = (s.c || []).filter((c) => c.i);
+    const start = Math.max(0, chromas.findIndex((c) => c.id && c.id === chromaId));
     const dlg = $("#detail");
     $("#detailIn").innerHTML = `<button class="detail__close" type="button" aria-label="Fechar" data-close>×</button>
-      <div class="detail__art" style="--tier:${esc(t.color)}" id="detailArt">${art(chromas[0]?.i || s.i, s.n, s.id + "d")}</div>
+      <div class="detail__art" style="--tier:${esc(t.color)}" id="detailArt">${art(chromas[start]?.i || s.i, s.n, s.id + "d")}</div>
       <div class="detail__body">
         <div><p class="eyebrow" style="color:${esc(t.color)}">${esc(t.name)}</p><h2 id="detailName">${esc(s.n)}</h2></div>
         <div class="detail__meta"><span>${esc(weaponOf(s))}</span><span>${(s.l || []).length} ${(s.l || []).length === 1 ? "nível" : "níveis"}</span><span>${chromas.length || 1} ${chromas.length > 1 ? "variações de cor" : "variação"}</span></div>
-        ${chromas.length > 1 ? `<div><p class="eyebrow">Variações</p><div class="swatches">${chromas.map((c, i) => `<button class="swatch" type="button" data-chroma="${i}" aria-pressed="${i === 0}" title="${esc(c.n)}" aria-label="${esc(c.n)}">${typeof c.s === "string" ? `<img src="${esc(c.s)}" alt="" loading="lazy">` : `<span style="display:block;width:100%;height:100%;background:linear-gradient(135deg,${esc(c.i.a)},${esc(c.i.b)})"></span>`}</button>`).join("")}</div></div>` : ""}
+        ${chromas.length > 1 ? `<div><p class="eyebrow">Variações</p><div class="swatches">${chromas.map((c, i) => `<button class="swatch" type="button" data-chroma="${i}" aria-pressed="${i === start}" title="${esc(c.n)}" aria-label="${esc(c.n)}">${typeof c.s === "string" ? `<img src="${esc(c.s)}" alt="" loading="lazy">` : `<span style="display:block;width:100%;height:100%;background:linear-gradient(135deg,${esc(c.i.a)},${esc(c.i.b)})"></span>`}</button>`).join("")}</div></div>` : ""}
       </div>`;
     dlg._chromas = chromas; dlg._skin = s;
     if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
@@ -245,11 +292,29 @@
   async function loadLive() {
     view("loading");
     loadingText("Buscando sua loja…");
-    const [cat, data, owned] = await Promise.all([api("/api/catalog"), api("/api/store"), api("/api/owned").catch(() => ({ items: [] }))]);
+    const [cat, data, owned, loadout] = await Promise.all([
+      api("/api/catalog"), api("/api/store"),
+      api("/api/owned").catch(() => ({ items: [] })),
+      api("/api/loadout").catch(() => null),
+    ]);
     indexCatalog(cat);
-    state.mode = "live"; state.data = data; state.owned = owned.items || [];
+    state.mode = "live"; state.data = data; state.owned = owned.items || []; state.loadout = loadout;
     $("#demoNote").hidden = true;
     view("app"); renderAll(); showTab(location.hash.slice(1));
+  }
+
+  // Inventário de exemplo: equipa algumas das skins da coleção de exemplo, o resto fica padrão.
+  function demoLoadout() {
+    const mine = new Map();
+    for (const id of state.owned) { const s = state.byLevel.get(id); if (s && !mine.has(s.w)) mine.set(s.w, s); }
+    return {
+      level: 87, title: "Exemplo", card: null, sprays: [],
+      guns: state.catalog.weapons.map((w, i) => {
+        const s = mine.get(i);
+        const c = s?.c?.length > 1 && Math.random() < 0.4 ? s.c[1] : s?.c?.[0];
+        return { weapon: w.id, skin: s ? s.id : w.def, chroma: c?.id || null, buddy: null };
+      }),
+    };
   }
 
   // Demonstração: usa os dados embutidos (prévia) ou monta uma loja aleatória a partir do catálogo real.
@@ -275,6 +340,7 @@
     }
     indexCatalog(demo.catalog);
     state.mode = "demo"; state.data = demo.store; state.owned = demo.owned; state.me = demo.me;
+    state.loadout = demo.loadout || demoLoadout();
     $("#demoNote").hidden = false;
     $("#demoNoteText").textContent = window.VITRINE_DEMO
       ? "Aqui as armas são silhuetas desenhadas. Rodando no seu PC, aparecem as imagens reais e a sua loja de verdade."
@@ -317,7 +383,7 @@
     if (t.dataset.tab) { history.replaceState(null, "", "#" + t.dataset.tab); showTab(t.dataset.tab); }
     else if (t.dataset.reveal != null) reveal(Number(t.dataset.reveal));
     else if (t.id === "revealAll") reveal("all");
-    else if (t.dataset.skin) openDetail(t.dataset.skin);
+    else if (t.dataset.skin) openDetail(t.dataset.skin, t.dataset.eqchroma);
     else if (t.dataset.bundle != null) { state.bundleIdx = Number(t.dataset.bundle); renderBundle(); tick(); }
     else if (t.dataset.weapon != null) { state.weapon = t.dataset.weapon; renderOwned(); }
     else if (t.dataset.chroma != null) {

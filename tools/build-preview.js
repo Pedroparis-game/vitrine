@@ -2,7 +2,8 @@
 const fs = require("fs"), path = require("path");
 const root = path.join(__dirname, "..");
 const T = { S: { name: "Select", color: "#5a9fe2", rank: 1 }, D: { name: "Deluxe", color: "#009587", rank: 2 }, P: { name: "Premium", color: "#d1548d", rank: 3 }, E: { name: "Exclusive", color: "#f5955b", rank: 4 }, U: { name: "Ultra", color: "#fad663", rank: 5 } };
-const W = [["Vandal","rifle"],["Phantom","rifle"],["Operator","sniper"],["Sheriff","pistol"],["Spectre","smg"],["Judge","shotgun"],["Odin","mg"],["Ghost","pistol"],["Classic","pistol"],["Corpo a Corpo","melee"],["Bulldog","rifle"],["Marshal","sniper"]];
+const W = [["Vandal","rifle","Rifle",2900],["Phantom","rifle","Rifle",2900],["Operator","sniper","Sniper",4700],["Sheriff","pistol","Sidearm",800],["Spectre","smg","SMG",1600],["Judge","shotgun","Shotgun",1850],["Odin","mg","Heavy",3200],["Ghost","pistol","Sidearm",500],["Classic","pistol","Sidearm",0],["Corpo a Corpo","melee","Melee",0],["Bulldog","rifle","Rifle",2050],["Marshal","sniper","Sniper",950],["Stinger","smg","SMG",1100],["Bucky","shotgun","Shotgun",850],["Ares","mg","Heavy",1600],["Guardian","rifle","Rifle",2250],["Frenzy","pistol","Sidearm",450],["Shorty","shotgun","Sidearm",150],["Outlaw","sniper","Sniper",2400]];
+const GREY = { a: "#8d96a3", b: "#c3c9d1" };
 const C = { // coleção: tier, cores das variações
   "Brasa": ["U", [["#ff6a3d","#ffd166"],["#3d7bff","#a8f0ff"],["#9b3dff","#ff8ad8"]]],
   "Aurora": ["E", [["#7cf5d0","#6b5bff"],["#ffe37a","#ff6fa8"]]],
@@ -15,13 +16,13 @@ const C = { // coleção: tier, cores das variações
 };
 const wi = (n) => W.findIndex((w) => w[0] === n);
 const skins = []; const id = (col, w) => (col + "-" + w).toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-");
-for (const [col, [tier, chromas]] of Object.entries(C)) for (const [wn, kind] of W) {
+for (const [col, [tier, chromas]] of Object.entries(C)) for (const [wn, kind] of W.slice(0, 12)) {
   const sid = id(col, wn);
   const lv = /Brasa|Aurora|Neon|Eclipse/.test(col) ? 4 : 1;
   skins.push({ id: sid, n: wn === "Corpo a Corpo" ? `Lâmina ${col}` : `${wn} ${col}`, w: wi(wn), t: tier,
     i: { k: kind, a: chromas[0][0], b: chromas[0][1] },
     l: Array.from({ length: lv }, (_, i) => `${sid}-l${i + 1}`),
-    c: chromas.map(([a, b], i) => ({ n: i ? `Variação ${i + 1}` : "Original", i: { k: kind, a, b }, s: null })) });
+    c: chromas.map(([a, b], i) => ({ id: `${sid}-c${i}`, n: i ? `Variação ${i + 1}` : "Original", i: { k: kind, a, b }, s: null })) });
 }
 const price = { S: 875, D: 1275, P: 1775, E: 2175, U: 2475 };
 const cost = (sid) => { const s = skins.find((x) => x.id === sid); return s.w === wi("Corpo a Corpo") ? price[s.t] * 2 : price[s.t]; };
@@ -29,12 +30,17 @@ const off = (sid, pct) => ({ item: sid, cost: cost(sid), pct, discounted: Math.r
 const bundleItems = ["aurora-vandal","aurora-ghost","aurora-judge","aurora-corpo-a-corpo"].map((s) => ({ item: s, cost: cost(s) }));
 const demo = {
   me: { name: "Pedro", tag: "BR1" },
-  catalog: { tiers: T, weapons: W.map(([n]) => ({ id: n, name: n })), skins },
+  catalog: { tiers: T, weapons: W.map(([n, k, cat, cost]) => ({ id: n, name: n, cat, cost, def: "padrao-" + n, icon: { k, ...GREY } })), skins },
   store: {
     wallet: { vp: 3250, rad: 40, kc: 12500 },
     daily: { remaining: 7 * 3600 + 42 * 60 + 13, offers: ["brasa-operator","mare-phantom","granito-sheriff","neon-sul-spectre"].map((s) => ({ item: s, cost: cost(s) })) },
     bundles: [{ name: "Aurora", image: { k: "rifle", a: "#7cf5d0", b: "#6b5bff" }, remaining: 4 * 86400 + 5 * 3600, cost: Math.round(bundleItems.reduce((a, i) => a + i.cost, 0) * 0.8 / 5) * 5, items: bundleItems }],
     night: { remaining: 9 * 86400 + 3 * 3600, offers: [off("eclipse-vandal", 32), off("pampa-classic", 18), off("origami-odin", 25), off("mare-operator", 41), off("neon-sul-corpo-a-corpo", 22), off("granito-bulldog", 15)] },
+  },
+  loadout: {
+    level: 87, title: "Lenda do Rush B", card: null, sprays: [],
+    guns: [["Vandal","brasa-vandal",1],["Phantom","aurora-phantom",0],["Sheriff","origami-sheriff",1],["Ghost","mare-ghost",0],["Operator","neon-sul-operator",0],["Corpo a Corpo","eclipse-corpo-a-corpo",0],["Spectre","mare-spectre",1]]
+      .map(([w, sid, c]) => ({ weapon: w, skin: sid, chroma: (skins.find((x) => x.id === sid).c[c] || {}).id || null, buddy: null })),
   },
   owned: ["brasa-vandal","brasa-sheriff","aurora-phantom","mare-ghost","mare-spectre","neon-sul-vandal","neon-sul-operator","granito-classic","granito-judge","pampa-bulldog","pampa-marshal","origami-sheriff","origami-phantom","eclipse-corpo-a-corpo","eclipse-ghost","aurora-operator","brasa-corpo-a-corpo","mare-vandal","pampa-spectre","origami-classic","granito-odin"].map((s) => s + "-l1"),
 };

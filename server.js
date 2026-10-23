@@ -88,14 +88,17 @@ async function catalog() {
   const out = { tiers: {}, weapons: [], skins: [] };
   for (const t of tiers.data) out.tiers[t.uuid] = { name: t.devName, color: "#" + String(t.highlightColor || "8a94a3").slice(0, 6), rank: (t.rank ?? 0) + 1 };
   weapons.data.forEach((w, wi) => {
-    out.weapons.push({ id: w.uuid, name: w.displayName });
+    out.weapons.push({
+      id: w.uuid, name: w.displayName, cat: String(w.category || "").split("::").pop(),
+      icon: w.displayIcon, def: w.defaultSkinUuid, cost: w.shopData?.cost ?? 0,
+    });
     for (const s of w.skins || []) {
       if (/random|aleat/i.test(s.displayName)) continue;
       out.skins.push({
         id: s.uuid, n: s.displayName, w: wi, t: s.contentTierUuid,
         i: s.levels?.[0]?.displayIcon || s.displayIcon || s.chromas?.[0]?.fullRender || null,
         l: (s.levels || []).map((l) => l.uuid),
-        c: (s.chromas || []).map((c) => ({ n: c.displayName, i: c.fullRender || c.displayIcon, s: c.swatch })),
+        c: (s.chromas || []).map((c) => ({ id: c.uuid, n: c.displayName, i: c.fullRender || c.displayIcon, s: c.swatch })),
       });
     }
   });
@@ -206,6 +209,34 @@ async function owned(s) {
   return { items: (r.Entitlements || []).map((e) => e.ItemID) };
 }
 
+/* ---------------- inventário: o que está equipado ---------------- */
+const pubCache = new Map();
+async function pubItem(kind, id, pick) {
+  if (!id) return null;
+  const key = kind + "/" + id;
+  if (!pubCache.has(key)) {
+    try { pubCache.set(key, pick((await getJSON(`https://valorant-api.com/v1/${kind}/${id}?language=${LANG}`)).data)); }
+    catch { return null; }
+  }
+  return pubCache.get(key);
+}
+
+async function loadout(s) {
+  const r = await pd(s, `/personalization/v2/players/${s.puuid}/playerloadout`);
+  const guns = r.Guns || [];
+  const [card, title, sprays, buddies] = await Promise.all([
+    pubItem("playercards", r.Identity?.PlayerCardID, (d) => ({ n: d.displayName, wide: d.wideArt, small: d.smallArt })),
+    pubItem("playertitles", r.Identity?.PlayerTitleID, (d) => d.titleText || null),
+    Promise.all((r.Sprays || []).map((x) => pubItem("sprays", x.SprayID, (d) => ({ n: d.displayName, i: d.fullTransparentIcon || d.displayIcon })))),
+    Promise.all(guns.map((g) => pubItem("buddies/levels", g.CharmLevelID, (d) => ({ n: d.displayName, i: d.displayIcon })))),
+  ]);
+  return {
+    level: r.Identity?.HideAccountLevel ? null : r.Identity?.AccountLevel ?? null,
+    card, title, sprays: sprays.filter(Boolean),
+    guns: guns.map((g, i) => ({ weapon: g.ID, skin: g.SkinID, chroma: g.ChromaID, buddy: buddies[i] })),
+  };
+}
+
 /* ---------------- rotas ---------------- */
 const MIME = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon", ".webp": "image/webp" };
 
@@ -227,6 +258,7 @@ async function route(req, res) {
     if (p === "/api/catalog") return send(req, res, 200, await catalog(), undefined, { "Cache-Control": "public, max-age=3600" });
     if (p === "/api/me") { const s = sessionOf(req); return send(req, res, 200, { name: s.name, tag: s.tag, region: s.region }); }
     if (p === "/api/store") return send(req, res, 200, await storefront(sessionOf(req)), undefined, { "Cache-Control": "no-store" });
+    if (p === "/api/loadout") return send(req, res, 200, await loadout(sessionOf(req)), undefined, { "Cache-Control": "no-store" });
     if (p === "/api/owned") return send(req, res, 200, await owned(sessionOf(req)), undefined, { "Cache-Control": "no-store" });
     throw new HttpError(404, "Rota não encontrada.");
   }

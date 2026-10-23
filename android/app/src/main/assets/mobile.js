@@ -10,7 +10,7 @@
   const SKIN_LEVEL_TYPE = "e7c63390-eda7-46e0-bb7a-a6abdacd2433";
   const SHARD = { na: "na", latam: "na", br: "na", pbe: "pbe", eu: "eu", ap: "ap", kr: "kr" };
   const PLATFORM = btoa(JSON.stringify({ platformType: "PC", platformOS: "Windows", platformOSVersion: "10.0.19042.1.256.64bit", platformChipset: "Unknown" }));
-  const K = { session: "vitrine-session", ever: "vitrine-ever", catalog: "vitrine-catalog", relogin: "vitrine-relogin-at" };
+  const K = { session: "vitrine-session", ever: "vitrine-ever", catalog: "vitrine-catalog-v2", relogin: "vitrine-relogin-at" };
   const TIMEOUT = 25000; // nenhuma chamada espera mais que isso
   const log = (...a) => console.log("[vitrine]", ...a);
 
@@ -162,14 +162,17 @@
     const out = { tiers: {}, weapons: [], skins: [] };
     for (const t of tiers.data) out.tiers[t.uuid] = { name: t.devName, color: "#" + String(t.highlightColor || "8a94a3").slice(0, 6), rank: (t.rank ?? 0) + 1 };
     weapons.data.forEach((w, wi) => {
-      out.weapons.push({ id: w.uuid, name: w.displayName });
+      out.weapons.push({
+      id: w.uuid, name: w.displayName, cat: String(w.category || "").split("::").pop(),
+      icon: w.displayIcon, def: w.defaultSkinUuid, cost: w.shopData?.cost ?? 0,
+    });
       for (const s of w.skins || []) {
         if (/random|aleat/i.test(s.displayName)) continue;
         out.skins.push({
           id: s.uuid, n: s.displayName, w: wi, t: s.contentTierUuid,
           i: s.levels?.[0]?.displayIcon || s.displayIcon || s.chromas?.[0]?.fullRender || null,
           l: (s.levels || []).map((l) => l.uuid),
-          c: (s.chromas || []).map((c) => ({ n: c.displayName, i: c.fullRender || c.displayIcon, s: c.swatch })),
+          c: (s.chromas || []).map((c) => ({ id: c.uuid, n: c.displayName, i: c.fullRender || c.displayIcon, s: c.swatch })),
         });
       }
     });
@@ -244,6 +247,34 @@
     return { items: (r.Entitlements || []).map((e) => e.ItemID) };
   }
 
+/* ---------------- inventário: o que está equipado ---------------- */
+  const pubCache = new Map();
+  async function pubItem(kind, id, pick) {
+    if (!id) return null;
+    const key = kind + "/" + id;
+    if (!pubCache.has(key)) {
+      try { pubCache.set(key, pick((await publicJSON(`https://valorant-api.com/v1/${kind}/${id}?language=${LANG}`)).data)); }
+      catch { return null; }
+    }
+    return pubCache.get(key);
+  }
+  
+  async function loadout(s) {
+    const r = await pd(s, `/personalization/v2/players/${s.puuid}/playerloadout`);
+    const guns = r.Guns || [];
+    const [card, title, sprays, buddies] = await Promise.all([
+      pubItem("playercards", r.Identity?.PlayerCardID, (d) => ({ n: d.displayName, wide: d.wideArt, small: d.smallArt })),
+      pubItem("playertitles", r.Identity?.PlayerTitleID, (d) => d.titleText || null),
+      Promise.all((r.Sprays || []).map((x) => pubItem("sprays", x.SprayID, (d) => ({ n: d.displayName, i: d.fullTransparentIcon || d.displayIcon })))),
+      Promise.all(guns.map((g) => pubItem("buddies/levels", g.CharmLevelID, (d) => ({ n: d.displayName, i: d.displayIcon })))),
+    ]);
+    return {
+      level: r.Identity?.HideAccountLevel ? null : r.Identity?.AccountLevel ?? null,
+      card, title, sprays: sprays.filter(Boolean),
+      guns: guns.map((g, i) => ({ weapon: g.ID, skin: g.SkinID, chroma: g.ChromaID, buddy: buddies[i] })),
+    };
+  }
+
   /* ---------------- rotas que o app.js usa ---------------- */
   window.VITRINE_API = async (path, opts = {}) => {
     const me = (s) => ({ name: s.name, tag: s.tag, region: s.region });
@@ -258,6 +289,7 @@
       case "/api/catalog": return catalog();
       case "/api/store": return storefront(await current());
       case "/api/owned": return owned(await current());
+      case "/api/loadout": return loadout(await current());
       default: throw err(404, "Rota não encontrada.");
     }
   };
