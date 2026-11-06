@@ -1,0 +1,7 @@
+--------- beginning of main
+11-06 23:05:52.864  5912  5912 I Vitrine : abrindo (autoteste=false, ponte=true)
+11-06 23:05:53.179  5912  5912 I Vitrine : página: https://appassets.androidplatform.net/assets/index.html
+11-06 23:05:53.287  5912  5912 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+11-06 23:06:06.928  6075  6075 I Vitrine : abrindo (autoteste=false, ponte=true)
+11-06 23:06:07.172  6075  6075 I Vitrine : página: https://appassets.androidplatform.net/assets/index.html
+11-06 23:06:07.292  6075  6075 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html

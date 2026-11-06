@@ -1,0 +1,42 @@
+--------- beginning of main
+11-06 23:06:22.555  6314  6314 I Vitrine : abrindo (autoteste=false, ponte=true)
+11-06 23:06:22.871  6314  6314 I Vitrine : página: https://appassets.androidplatform.net/assets/index.html
+11-06 23:06:22.982  6314  6314 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+11-06 23:06:27.379  6314  6314 I Vitrine : abrindo (autoteste=true, ponte=true)
+11-06 23:06:27.424  6314  6314 I Vitrine : página: https://appassets.androidplatform.net/assets/index.html
+11-06 23:06:27.786  6314  6314 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+11-06 23:06:29.132  6314  6314 I Vitrine : js: [autotest] ponte nativa: sim
+11-06 23:06:29.132  6314  6314 I Vitrine : js: [autotest] tela inicial: viewConnect
+11-06 23:06:29.135  6314  6314 I Vitrine : js: [autotest] OK   versão do cliente (valorant-api) 4ms release-13.09-shipping-18-5804228
+11-06 23:06:29.138  6314  6462 W Vitrine : http GET valorant-api.com/v1/version falhou: UnknownHostException Unable to resolve host "valorant-api.com": No address associated with hostname
+11-06 23:06:29.146  6314  6314 I Vitrine : js: [vitrine] falha de rede GET https://valorant-api.com/v1/version Unable to resolve host "valorant-api.com": No address associated with hostname
+11-06 23:06:29.146  6314  6314 I Vitrine : js: [autotest] FALHOU versão pela ponte 11ms status=0 Sem conexão com a internet. Confira o Wi-Fi ou os dados móveis.
+11-06 23:06:29.205  6314  6314 I Vitrine : js: [vitrine] catálogo baixado em 56 ms
+11-06 23:06:29.255  6314  6314 I Vitrine : js: [autotest] OK   catálogo completo 74ms 1412 skins, 21 armas
+11-06 23:06:29.255  6314  6314 I Vitrine : js: [autotest] OK   catálogo guardado no celular 8ms sim
+11-06 23:06:29.256  6314  6464 W Vitrine : http GET pd.na.a.pvp.net/store/v1/offers/ falhou: UnknownHostException Unable to resolve host "pd.na.a.pvp.net": No address associated with hostname
+11-06 23:06:29.264  6314  6314 I Vitrine : js: [vitrine] falha de rede GET https://pd.na.a.pvp.net/store/v1/offers/ Unable to resolve host "pd.na.a.pvp.net": No address associated with hostname
+11-06 23:06:29.264  6314  6314 I Vitrine : js: [autotest] FALHOU Riot sem login responde (espera 400/401) 33ms status=0 Sem conexão com a internet. Confira o Wi-Fi ou os dados móveis.
+11-06 23:06:29.265  6314  6466 W Vitrine : http POST entitlements.auth.riotgames.com/api/token/v1 falhou: UnknownHostException Unable to resolve host "entitlements.auth.riotgames.com": No address associated with hostname
+11-06 23:06:29.279  6314  6314 I Vitrine : js: [vitrine] falha de rede POST https://entitlements.auth.riotgames.com/api/token/v1 Unable to resolve host "entitlements.auth.riotgames.com": No address associated with hostname
+11-06 23:06:29.281  6314  6314 I Vitrine : js: [autotest] FALHOU entitlements sem token (espera 401/403) 17ms status=0 Sem conexão com a internet. Confira o Wi-Fi ou os dados móveis.
+11-06 23:06:29.282  6314  6468 W Vitrine : http  falhou: IllegalArgumentException Endereço não permitido
+11-06 23:06:29.282  6314  6314 I Vitrine : js: [autotest] OK   ponte recusa site fora da lista 1ms recusou
+11-06 23:06:29.282  6314  6462 W Vitrine : http GET valorant-api.com/v1/version falhou: UnknownHostException Unable to resolve host "valorant-api.com": No address associated with hostname
+11-06 23:06:29.283  6314  6314 I Vitrine : js: [autotest] OK   limite de tempo funciona 1ms não esperou?
+11-06 23:06:29.283  6314  6464 W Vitrine : http GET pd.na.a.pvp.net/personalization/v2/players/00000000-0000-0000-0000-000000000000/playerloadout falhou: UnknownHostException Unable to resolve host "pd.na.a.pvp.net": No address associated with hostname
+11-06 23:06:29.284  6314  6314 I Vitrine : js: [vitrine] falha de rede GET https://pd.na.a.pvp.net/personalization/v2/players/00000000-0000-0000-0000-000000000000/playerloadout Unable to resolve host "pd.na.a.pvp.net": No address associated with hostname
+11-06 23:06:29.284  6314  6314 I Vitrine : js: [autotest] FALHOU endereço do equipado v2 existe (sem login: 400/401 = existe, 404 = não) 0ms status=0 Sem conexão com a internet. Confira o Wi-Fi ou os dados móveis.
+11-06 23:06:29.284  6314  6466 W Vitrine : http GET pd.na.a.pvp.net/personalization/v3/players/00000000-0000-0000-0000-000000000000/playerloadout falhou: UnknownHostException Unable to resolve host "pd.na.a.pvp.net": No address associated with hostname
+11-06 23:06:29.284  6314  6314 I Vitrine : js: [vitrine] falha de rede GET https://pd.na.a.pvp.net/personalization/v3/players/00000000-0000-0000-0000-000000000000/playerloadout Unable to resolve host "pd.na.a.pvp.net": No address associated with hostname
+11-06 23:06:29.285  6314  6314 I Vitrine : js: [autotest] FALHOU endereço do equipado v3 existe (sem login: 400/401 = existe, 404 = não) 1ms status=0 Sem conexão com a internet. Confira o Wi-Fi ou os dados móveis.
+11-06 23:06:29.285  6314  6314 I Vitrine : js: [vitrine] renovação automática bloqueada tentativa recente
+11-06 23:06:29.285  6314  6314 I Vitrine : js: [autotest] OK   relogin bloqueado se repetido 0ms bloqueou (440)
+11-06 23:06:30.480  6314  6314 I Vitrine : js: [autotest] OK   demonstração abre 255ms 4 etiquetas na loja
+11-06 23:06:38.540  6314  6314 I Vitrine : js: [autotest] loja: alturas das imagens 76 cartões 209
+11-06 23:06:38.542  6314  6314 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+11-06 23:06:47.345  6314  6314 I Vitrine : js: [autotest] noturno: alturas 76 cartões 226,209
+11-06 23:06:47.346  6314  6314 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+11-06 23:06:56.347  6314  6314 I Vitrine : js: [autotest] coleção: alturas 77 vagas 171,170
+11-06 23:06:56.348  6314  6314 I Vitrine : js: [autotest] imagens maiores que a moldura: 0 
+11-06 23:07:02.350  6314  6314 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html

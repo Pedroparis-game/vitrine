@@ -1,0 +1,43 @@
+--------- beginning of main
+11-06 23:04:13.515  2908  2908 I Vitrine : abrindo (autoteste=true, ponte=true)
+11-06 23:04:14.389  2908  2908 I Vitrine : página: https://appassets.androidplatform.net/assets/index.html
+11-06 23:04:15.985  2908  2908 I Vitrine : abrindo (autoteste=true, ponte=true)
+11-06 23:04:16.432  2908  2908 I Vitrine : página: https://appassets.androidplatform.net/assets/index.html
+11-06 23:04:16.619  2908  2908 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+11-06 23:04:18.097  2908  2908 I Vitrine : js: [autotest] ponte nativa: sim
+11-06 23:04:18.098  2908  2908 I Vitrine : js: [autotest] tela inicial: viewConnect
+11-06 23:04:18.722  2908  2908 I Vitrine : js: [autotest] OK   versão do cliente (valorant-api) 624ms release-13.09-shipping-18-5804228
+11-06 23:04:18.896  2908  3721 I Vitrine : http GET valorant-api.com/v1/version -> 200 em 160ms (363 caracteres)
+11-06 23:04:18.900  2908  2908 I Vitrine : js: [autotest] OK   versão pela ponte 179ms release-13.09-shipping-18-5804228
+11-06 23:04:19.397  2908  2908 I Vitrine : js: [vitrine] catálogo baixado em 495 ms
+11-06 23:04:19.618  2908  2908 I Vitrine : js: [autotest] OK   catálogo completo 693ms 1412 skins, 21 armas
+11-06 23:04:19.641  2908  2908 I Vitrine : js: [autotest] OK   catálogo guardado no celular 40ms sim
+11-06 23:04:19.900  2908  3784 I Vitrine : http GET pd.na.a.pvp.net/store/v1/offers/ -> 400 em 247ms (122 caracteres)
+11-06 23:04:19.901  2908  2908 I Vitrine : js: [autotest] OK   Riot sem login responde (espera 400/401) 259ms respondeu 400
+11-06 23:04:20.122  2908  3796 I Vitrine : http POST entitlements.auth.riotgames.com/api/token/v1 -> 401 em 219ms (145 caracteres)
+11-06 23:04:20.125  2908  2908 I Vitrine : js: [autotest] OK   entitlements sem token (espera 401/403) 222ms respondeu 401
+11-06 23:04:20.129  2908  3806 W Vitrine : http  falhou: IllegalArgumentException Endereço não permitido
+11-06 23:04:20.132  2908  2908 I Vitrine : js: [autotest] OK   ponte recusa site fora da lista 8ms recusou
+11-06 23:04:20.182  2908  2908 I Vitrine : js: [vitrine] tempo esgotado nada https://valorant-api.com/v1/version
+11-06 23:04:20.182  2908  2908 I Vitrine : js: [autotest] OK   limite de tempo funciona 50ms cortou em 50ms
+11-06 23:04:20.215  2908  3784 I Vitrine : http GET pd.na.a.pvp.net/personalization/v2/players/00000000-0000-0000-0000-000000000000/playerloadout -> 400 em 32ms (122 caracteres)
+11-06 23:04:20.215  2908  2908 I Vitrine : js: [autotest] OK   endereço do equipado v2 existe (sem login: 400/401 = existe, 404 = não) 33ms respondeu 400 BAD_CLAIMS
+11-06 23:04:20.246  2908  3796 I Vitrine : http GET pd.na.a.pvp.net/personalization/v3/players/00000000-0000-0000-0000-000000000000/playerloadout -> 400 em 28ms (122 caracteres)
+11-06 23:04:20.249  2908  2908 I Vitrine : js: [autotest] OK   endereço do equipado v3 existe (sem login: 400/401 = existe, 404 = não) 31ms respondeu 400 BAD_CLAIMS
+11-06 23:04:20.249  2908  2908 I Vitrine : js: [vitrine] renovação automática bloqueada tentativa recente
+11-06 23:04:20.249  2908  2908 I Vitrine : js: [autotest] OK   relogin bloqueado se repetido 0ms bloqueou (440)
+11-06 23:04:20.270  2908  3721 I Vitrine : http GET valorant-api.com/v1/version -> 200 em 137ms (363 caracteres)
+11-06 23:04:20.665  2908  2908 I Vitrine : js: [autotest] OK   demonstração abre 419ms 4 etiquetas na loja
+11-06 23:04:29.668  2908  2908 I Vitrine : js: [autotest] loja: alturas das imagens 76 cartões 209
+11-06 23:04:29.670  2908  2908 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+11-06 23:04:38.476  2908  2908 I Vitrine : js: [autotest] noturno: alturas 76 cartões 226,209
+11-06 23:04:38.478  2908  2908 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+11-06 23:04:47.480  2908  2908 I Vitrine : js: [autotest] coleção: alturas 77 vagas 171,170
+11-06 23:04:47.482  2908  2908 I Vitrine : js: [autotest] imagens maiores que a moldura: 0 
+11-06 23:04:53.488  2908  2908 I Vitrine : carregou: https://appassets.androidplatform.net/assets/index.html
+11-06 23:05:00.000  2908  2908 I Vitrine : js: [autotest] indo para o login da Riot
+11-06 23:05:01.062  2908  2908 I Vitrine : página: https://authenticate.riotgames.com/
+11-06 23:05:04.978  2908  2908 I Vitrine : js: Uncaught (in promise) Could not clear consent from root domain.
+11-06 23:05:05.119  2908  2908 I Vitrine : carregou: https://authenticate.riotgames.com/
+11-06 23:05:07.466  2908  2908 I Vitrine : js: undefined
+11-06 23:05:11.129  2908  2908 I Vitrine : riot mostra: "Sign in | This website utilizes technologies such as cookies to enable essential site functionality, as well as for analytics, personalization, and targeted advertising. Privacy Notice Accept Deny Non-Essential Manage Preferences Sign in USERNAME USERNAME PASSWORD PASSWORD Stay signed in CAN'T SIGN "
