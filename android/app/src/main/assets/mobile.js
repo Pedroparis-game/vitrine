@@ -47,7 +47,7 @@
     const r = await native({ type: "http", url, method, headers, body });
     if (!r.status) { log("falha de rede", method, url.split("?")[0], r.error); throw err(0, "Sem conexão com a internet. Confira o Wi-Fi ou os dados móveis."); }
     let data; try { data = r.body ? JSON.parse(r.body) : {}; } catch { data = { raw: r.body }; }
-    if (r.status >= 400) throw err(r.status, data.message || data.error || `HTTP ${r.status}`);
+    if (r.status >= 400) throw err(r.status, data.errorCode || data.message || data.error || `HTTP ${r.status}`);
     return data;
   }
 
@@ -199,7 +199,8 @@
     };
     try { return await http(`https://pd.${s.shard}.a.pvp.net${path}`, { ...opts, headers }); }
     catch (e) {
-      if (e.status === 400 || e.status === 401) {
+      // quiet: um pedido opcional (como o equipado) que falha não derruba o login
+      if (!opts.quiet && (e.status === 400 || e.status === 401)) {
         session = null; ls.del(K.session);
         return relogin();
       }
@@ -260,8 +261,19 @@
   }
   
   async function loadout(s) {
-    const r = await pd(s, `/personalization/v2/players/${s.puuid}/playerloadout`);
-    const guns = r.Guns || [];
+    // Tenta o endereço conhecido (v2) e, se ele não existir mais, o próximo (v3).
+    let raw = null, last = null;
+    for (const v of ["v2", "v3"]) {
+      try { raw = await pd(s, `/personalization/${v}/players/${s.puuid}/playerloadout`, { quiet: true }); log("equipado ok via", v); break; }
+      catch (e) { last = e; log("equipado falhou via", v, e.status, e.message); if (e.status !== 404 && e.status !== 405) break; }
+    }
+    if (!raw) throw err(last?.status || 502, last?.status ? `A Riot respondeu ${last.status}${last.message && !/^HTTP/.test(last.message) ? ` (${last.message})` : ""}.` : (last?.message || "A Riot não respondeu."));
+    // Aceita variações no formato da resposta
+    const r = raw.Guns || raw.guns ? raw : raw.Loadout || raw.loadout || (Array.isArray(raw.Loadouts) ? raw.Loadouts[0] : null) || raw;
+    if (!r.Identity && raw.Identity) r.Identity = raw.Identity;
+    if (!r.Sprays && raw.Sprays) r.Sprays = raw.Sprays;
+    const guns = r.Guns || r.guns || [];
+    log("equipado:", guns.length, "armas");
     const [card, title, sprays, buddies] = await Promise.all([
       pubItem("playercards", r.Identity?.PlayerCardID, (d) => ({ n: d.displayName, wide: d.wideArt, small: d.smallArt })),
       pubItem("playertitles", r.Identity?.PlayerTitleID, (d) => d.titleText || null),
@@ -336,6 +348,12 @@
         try { await native({ type: "nada", url: "https://valorant-api.com/v1/version" }, 50); return "não esperou?"; }
         catch (e) { return e.status === 0 ? "cortou em 50ms" : e.message; }
       });
+      for (const v of ["v2", "v3"]) {
+        await step(`endereço do equipado ${v} existe (sem login: 400/401 = existe, 404 = não)`, async () => {
+          try { await http(`https://pd.na.a.pvp.net/personalization/${v}/players/00000000-0000-0000-0000-000000000000/playerloadout`, { headers: { Authorization: "Bearer x", "X-Riot-Entitlements-JWT": "x", "X-Riot-ClientPlatform": PLATFORM, "X-Riot-ClientVersion": await clientVersion() } }); return "200?"; }
+          catch (e) { if (e.status >= 400) return `respondeu ${e.status} ${e.message}`; throw e; }
+        });
+      }
       await step("relogin bloqueado se repetido", async () => {
         ls.set(K.relogin, Date.now());
         try { relogin(); return "NÃO bloqueou"; } catch (e) { return `bloqueou (${e.status})`; }
@@ -355,6 +373,11 @@
       T("noturno: alturas", sizes(".panel:not([hidden]) .stage"), "cartões", sizes(".panel:not([hidden]) .tag"));
       tab("colecao"); await wait(9000);
       T("coleção: alturas", sizes(".panel:not([hidden]) .stage"), "vagas", sizes(".slot"));
+      const big = () => [...document.querySelectorAll(".fit img")].filter((img) => img.offsetParent && img.complete).filter((img) => {
+        const f = img.closest(".fit").getBoundingClientRect(), r = img.getBoundingClientRect();
+        return r.height > f.height * 1.06 + 1 || r.width > f.width * 1.06 + 1;
+      }).map((img) => img.alt);
+      T("imagens maiores que a moldura:", big().length, big().slice(0, 5).join(" | "));
       window.scrollTo(0, 1400); await wait(6000);
       window.scrollTo(0, 0); tab("loja"); await wait(500);
       document.querySelector("#dailyGrid .tag")?.click(); await wait(6000);

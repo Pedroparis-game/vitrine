@@ -163,6 +163,7 @@ async function pd(s, pathname, opts = {}) {
   };
   try { return await getJSON(`https://pd.${s.shard}.a.pvp.net${pathname}`, { ...opts, headers }); }
   catch (e) {
+    if (opts.quiet) throw e; // pedido opcional: devolve o erro real, sem derrubar o login
     if (e.status === 400 || e.status === 401) throw new HttpError(401, "Sua sessão da Riot expirou. Faça o login de novo.");
     throw e;
   }
@@ -222,8 +223,17 @@ async function pubItem(kind, id, pick) {
 }
 
 async function loadout(s) {
-  const r = await pd(s, `/personalization/v2/players/${s.puuid}/playerloadout`);
-  const guns = r.Guns || [];
+  // Tenta o endereço conhecido (v2) e, se ele não existir mais, o próximo (v3).
+  let raw = null, last = null;
+  for (const v of ["v2", "v3"]) {
+    try { raw = await pd(s, `/personalization/${v}/players/${s.puuid}/playerloadout`, { quiet: true }); break; }
+    catch (e) { last = e; console.error("[equipado]", v, e.status, e.message); if (e.status !== 404 && e.status !== 405) break; }
+  }
+  if (!raw) throw new HttpError(502, last?.status ? `A Riot respondeu ${last.status}${last.body?.errorCode ? ` (${last.body.errorCode})` : ""}.` : `A Riot não respondeu (${last?.message || "sem resposta"}).`);
+  const r = raw.Guns || raw.guns ? raw : raw.Loadout || raw.loadout || (Array.isArray(raw.Loadouts) ? raw.Loadouts[0] : null) || raw;
+  if (!r.Identity && raw.Identity) r.Identity = raw.Identity;
+  if (!r.Sprays && raw.Sprays) r.Sprays = raw.Sprays;
+  const guns = r.Guns || r.guns || [];
   const [card, title, sprays, buddies] = await Promise.all([
     pubItem("playercards", r.Identity?.PlayerCardID, (d) => ({ n: d.displayName, wide: d.wideArt, small: d.smallArt })),
     pubItem("playertitles", r.Identity?.PlayerTitleID, (d) => d.titleText || null),

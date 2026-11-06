@@ -222,7 +222,11 @@
   function renderInventory() {
     const box = $("#invBox");
     const lo = state.loadout;
-    if (!lo) { box.innerHTML = `<p class="empty">Não deu para buscar o que está equipado agora. As skins que você tem aparecem abaixo.</p>`; return; }
+    if (!lo || lo.error) {
+      box.innerHTML = `<div class="empty empty--action"><p>Não deu para buscar o que está equipado.${lo?.error ? `<br><small>Motivo: ${esc(lo.error)}</small>` : ""}</p>
+        <button class="btn" type="button" id="retryLoadout">Tentar de novo</button></div>`;
+      return;
+    }
     const ws = state.catalog.weapons.filter((w) => w.cat);
     const ident = `<div class="ident"${lo.card?.wide ? ` style="background-image:url('${esc(lo.card.wide)}')"` : ""}>
         <div><p class="ident__name">${esc(state.me?.name || "")}<i>#${esc(state.me?.tag || "")}</i></p>
@@ -305,7 +309,7 @@
     const [cat, data, owned, loadout] = await Promise.all([
       api("/api/catalog"), api("/api/store"),
       api("/api/owned").catch(() => ({ items: [] })),
-      api("/api/loadout").catch(() => null),
+      api("/api/loadout").catch((e) => ({ error: e.message || "erro desconhecido" })),
     ]);
     indexCatalog(cat);
     state.mode = "live"; state.data = data; state.owned = owned.items || []; state.loadout = loadout;
@@ -430,6 +434,13 @@
   });
   $("#demoBtn").addEventListener("click", () => loadDemo().catch((e) => { view("connect"); $("#connectMsg").textContent = e.message; }));
   $("#retryBtn").addEventListener("click", () => location.reload());
+  // Tentar de novo só o equipado, sem recarregar tudo
+  document.addEventListener("click", async (e) => {
+    if (!e.target.closest("#retryLoadout")) return;
+    $("#invBox").innerHTML = `<div class="loading"><span></span>Buscando o que está equipado…</div>`;
+    state.loadout = state.mode === "demo" ? demoLoadout() : await api("/api/loadout").catch((x) => ({ error: x.message || "erro desconhecido" }));
+    renderInventory();
+  });
   $("#resetBtn").addEventListener("click", async () => {
     await api("/api/logout", { method: "POST" }).catch(() => {});
     location.reload();
