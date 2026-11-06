@@ -12,9 +12,9 @@ adb logcat -c
 
 # 1) Autoteste: ponte, catálogo, Riot, demonstração e página de login da Riot
 adb shell am start -n $PKG/.MainActivity --ez autotest true
-sleep 20; adb exec-out screencap -p > "$OUT/1-inicio.png"
-sleep 25; adb exec-out screencap -p > "$OUT/2-demonstracao.png"
-sleep 30; adb exec-out screencap -p > "$OUT/3-login-riot.png"
+# um print a cada 5 s enquanto o autoteste passeia pela loja, Mercado Noturno, Coleção e detalhe
+for i in $(seq -w 1 16); do sleep 5; adb exec-out screencap -p > "$OUT/tela-$i.png"; done
+sleep 15; adb exec-out screencap -p > "$OUT/3-login-riot.png"
 adb logcat -d -s Vitrine:* AndroidRuntime:E > "$OUT/log-autoteste.txt"
 
 # 2) Abrir normal duas vezes seguidas (o problema relatado: "abri uma vez, depois fica carregando")

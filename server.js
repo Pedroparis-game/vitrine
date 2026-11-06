@@ -86,7 +86,7 @@ async function catalog() {
     getJSON(`https://valorant-api.com/v1/contenttiers?language=${LANG}`),
   ]);
   const out = { tiers: {}, weapons: [], skins: [] };
-  for (const t of tiers.data) out.tiers[t.uuid] = { name: t.devName, color: "#" + String(t.highlightColor || "8a94a3").slice(0, 6), rank: (t.rank ?? 0) + 1 };
+  for (const t of tiers.data) out.tiers[t.uuid] = { name: t.devName, color: "#" + String(t.highlightColor || "8a94a3").slice(0, 6), rank: (t.rank ?? 0) + 1, icon: t.displayIcon || null };
   weapons.data.forEach((w, wi) => {
     out.weapons.push({
       id: w.uuid, name: w.displayName, cat: String(w.category || "").split("::").pop(),

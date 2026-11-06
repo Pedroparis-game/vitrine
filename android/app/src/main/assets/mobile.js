@@ -10,7 +10,7 @@
   const SKIN_LEVEL_TYPE = "e7c63390-eda7-46e0-bb7a-a6abdacd2433";
   const SHARD = { na: "na", latam: "na", br: "na", pbe: "pbe", eu: "eu", ap: "ap", kr: "kr" };
   const PLATFORM = btoa(JSON.stringify({ platformType: "PC", platformOS: "Windows", platformOSVersion: "10.0.19042.1.256.64bit", platformChipset: "Unknown" }));
-  const K = { session: "vitrine-session", ever: "vitrine-ever", catalog: "vitrine-catalog-v2", relogin: "vitrine-relogin-at" };
+  const K = { session: "vitrine-session", ever: "vitrine-ever", catalog: "vitrine-catalog-v3", relogin: "vitrine-relogin-at" };
   const TIMEOUT = 25000; // nenhuma chamada espera mais que isso
   const log = (...a) => console.log("[vitrine]", ...a);
 
@@ -160,7 +160,7 @@
     ]);
     log("catálogo baixado em", Date.now() - t0, "ms");
     const out = { tiers: {}, weapons: [], skins: [] };
-    for (const t of tiers.data) out.tiers[t.uuid] = { name: t.devName, color: "#" + String(t.highlightColor || "8a94a3").slice(0, 6), rank: (t.rank ?? 0) + 1 };
+    for (const t of tiers.data) out.tiers[t.uuid] = { name: t.devName, color: "#" + String(t.highlightColor || "8a94a3").slice(0, 6), rank: (t.rank ?? 0) + 1, icon: t.displayIcon || null };
     weapons.data.forEach((w, wi) => {
       out.weapons.push({
       id: w.uuid, name: w.displayName, cat: String(w.category || "").split("::").pop(),
@@ -346,7 +346,19 @@
         if (document.getElementById("viewApp").hidden) throw new Error("não abriu");
         return `${document.querySelectorAll("#dailyGrid .tag").length} etiquetas na loja`;
       });
-      await wait(12000); // tempo para o print da demonstração
+      // Passeio pelas telas com skins reais, para os prints do teste (a cada 5 s o emulador tira um print).
+      const tab = (n) => document.querySelector(`[data-tab="${n}"]`).click();
+      const sizes = (sel) => [...new Set([...document.querySelectorAll(sel)].filter((e) => e.offsetParent).map((e) => Math.round(e.getBoundingClientRect().height)))];
+      await wait(9000);
+      T("loja: alturas das imagens", sizes(".panel:not([hidden]) .stage"), "cartões", sizes(".panel:not([hidden]) .tag"));
+      tab("noturno"); await wait(800); document.getElementById("revealAll")?.click(); await wait(8000);
+      T("noturno: alturas", sizes(".panel:not([hidden]) .stage"), "cartões", sizes(".panel:not([hidden]) .tag"));
+      tab("colecao"); await wait(9000);
+      T("coleção: alturas", sizes(".panel:not([hidden]) .stage"), "vagas", sizes(".slot"));
+      window.scrollTo(0, 1400); await wait(6000);
+      window.scrollTo(0, 0); tab("loja"); await wait(500);
+      document.querySelector("#dailyGrid .tag")?.click(); await wait(6000);
+      document.getElementById("detail").close?.();
       T("indo para o login da Riot");
       location.href = LOGIN_URL;
     })();

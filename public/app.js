@@ -48,7 +48,8 @@
       state.byLevel.set(s.id, s);
     }
   }
-  const tierOf = (s) => (s && state.catalog.tiers[s.t]) || { name: "Padrão", color: "#8a94a3", rank: 0 };
+  const tierOf = (s) => (s && state.catalog.tiers[s.t]) || { name: "Passe ou contrato", color: "#6fa8a0", rank: 0 };
+  const tierBadge = (t) => (t?.icon ? `<img class="tier-ico" src="${esc(t.icon)}" alt="" loading="lazy">` : `<i class="tier-dot" aria-hidden="true"></i>`);
   const weaponOf = (s) => state.catalog.weapons[s?.w]?.name || "";
 
   /* ---------------- arte ---------------- */
@@ -69,30 +70,32 @@
       <stop offset="0" stop-color="${esc(art.a)}"/><stop offset=".55" stop-color="${esc(art.b)}"/><stop offset="1" stop-color="${esc(art.a)}"/></linearGradient></defs>
       <path d="${d}" fill="url(#${g})" stroke="rgba(0,0,0,.35)" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
   }
+  // A imagem fica numa moldura de tamanho fixo dentro do palco: qualquer proporção cabe sem empurrar o cartão.
   function art(img, alt, id) {
-    if (!img) return `<span class="q">?</span>`;
-    if (typeof img === "object") return artSVG(img, id);
-    return `<img src="${esc(img)}" alt="${esc(alt)}" loading="lazy" decoding="async">`;
+    if (!img) return `<span class="fit"><span class="q">?</span></span>`;
+    if (typeof img === "object") return `<span class="fit">${artSVG(img, id)}</span>`;
+    return `<span class="fit"><img src="${esc(img)}" alt="${esc(alt)}" loading="lazy" decoding="async"></span>`;
   }
 
   /* ---------------- etiqueta ---------------- */
-  function tagHTML(skin, { price, base, pct, small, hidden, idx } = {}) {
+  function tagHTML(skin, { price, base, pct, hidden, idx } = {}) {
     if (hidden) {
       return `<button class="tag tag--hidden" type="button" data-reveal="${idx}" aria-label="Revelar oferta ${idx + 1}">
-        <div class="tag__art"><span class="q">?</span></div>
-        <div class="tag__body"><span class="tag__tier">Oferta oculta</span><span class="tag__name">Toque para revelar</span><span class="tag__weapon">&nbsp;</span>
-        <span class="tag__price">&nbsp;</span></div></button>`;
+        <div class="stage"><span class="fit"><span class="q">?</span></span></div>
+        <div class="tag__body"><span class="tag__tier">Oferta oculta</span><span class="tag__name">Toque para revelar</span>
+        <span class="tag__weapon">Mercado Noturno</span><span class="tag__foot"><span class="price price--ghost">???<small>VP</small></span></span></div></button>`;
     }
     const t = tierOf(skin);
     const name = skin?.n || "Item desconhecido";
-    return `<button class="tag" type="button" style="--tier:${esc(t.color)}" data-skin="${esc(skin?.id || "")}">
-      ${pct ? `<span class="tag__off">−${pct}%</span>` : ""}
-      <div class="tag__art">${art(skin?.i, name, skin?.id || "x")}</div>
+    const vp = state.data?.wallet?.vp;
+    const short = price != null && vp != null && price > vp ? price - vp : 0;
+    return `<button class="tag" type="button" style="--tier:${esc(t.color)}" data-skin="${esc(skin?.id || "")}" title="${esc(name)}">
+      <div class="stage">${pct ? `<span class="off">−${pct}%</span>` : ""}${art(skin?.i, name, skin?.id || "x")}</div>
       <div class="tag__body">
-        <span class="tag__tier">${esc(t.name)}</span>
+        <span class="tag__tier">${tierBadge(t)}${esc(t.name)}</span>
         <span class="tag__name">${esc(name)}</span>
         <span class="tag__weapon">${esc(weaponOf(skin))}</span>
-        ${price != null ? `<span class="tag__price">${fmt(price)} <small>VP</small>${base ? `<s>${fmt(base)}</s>` : ""}</span>` : ""}
+        ${price != null ? `<span class="tag__foot"><span class="price">${fmt(price)}<small>VP</small></span>${base ? `<s>${fmt(base)}</s>` : ""}${short ? `<span class="short">faltam ${fmt(short)}</span>` : ""}</span>` : ""}
       </div></button>`;
   }
 
@@ -112,6 +115,9 @@
     state.deadlines.daily = state.loadedAt + (d?.remaining || 0) * 1000;
     $("#dailyGrid").innerHTML = (d?.offers || []).map((o) => tagHTML(state.byLevel.get(o.item), { price: o.cost })).join("")
       || `<p class="empty">A loja do dia não veio na resposta. Tente atualizar a página.</p>`;
+    const total = (d?.offers || []).reduce((a, o) => a + (o.cost || 0), 0);
+    const vp = state.data.wallet?.vp;
+    $("#dailySum").textContent = total ? `${d.offers.length} ofertas · ${fmt(total)} VP no total${vp != null ? ` · você tem ${fmt(vp)} VP` : ""}` : "";
   }
 
   function renderBundle() {
@@ -141,7 +147,7 @@
   function renderNight() {
     const n = state.data.night;
     const tab = $("#tabNight");
-    tab.innerHTML = "Mercado Noturno" + (n ? `<span class="dot" aria-label="aberto"></span>` : "");
+    tab.innerHTML = `<span class="long">Mercado </span>Noturno` + (n ? `<span class="dot" aria-label="aberto"></span>` : "");
     $("#nightSign").hidden = !n;
     if (!n) { $("#nightBox").innerHTML = `<p class="empty">O Mercado Noturno está fechado agora. Ele abre algumas vezes por ano e aparece aqui sozinho quando estiver ativo.</p>`; return; }
     state.deadlines.night = state.loadedAt + (n.remaining || 0) * 1000;
@@ -204,12 +210,12 @@
     const t = e.skin && state.catalog.tiers[e.skin.t] ? tierOf(e.skin) : null; // skins de passe não têm raridade
     const name = e.skin ? e.skin.n : "Padrão";
     const tag = e.skin ? "button" : "div";
-    return `<${tag} class="slot${e.skin ? "" : " slot--default"}"${e.skin ? ` type="button" data-skin="${esc(e.skin.id)}" data-eqchroma="${esc(e.g?.chroma || "")}"` : ""} style="--tier:${esc(t ? t.color : e.skin ? "#6fa8a0" : "#8a94a3")}">
-      <div class="slot__art">${art(e.img, name, wd.id)}${e.buddy?.i ? `<img class="slot__buddy" src="${esc(e.buddy.i)}" alt="Chaveiro ${esc(e.buddy.n)}" title="${esc(e.buddy.n)}" loading="lazy">` : ""}</div>
+    return `<${tag} class="slot${e.skin ? "" : " slot--default"}"${e.skin ? ` type="button" data-skin="${esc(e.skin.id)}" data-eqchroma="${esc(e.g?.chroma || "")}" title="${esc(name)}"` : ""} style="--tier:${esc(t ? t.color : e.skin ? "#6fa8a0" : "#5b6472")}">
+      <div class="stage">${art(e.img, name, wd.id)}${e.buddy?.i ? `<img class="stage__buddy" src="${esc(e.buddy.i)}" alt="Chaveiro ${esc(e.buddy.n)}" title="${esc(e.buddy.n)}" loading="lazy">` : ""}</div>
       <div class="slot__body">
-        <span class="slot__weapon">${esc(wd.name)}${t ? ` · ${esc(t.name)}` : ""}</span>
+        <span class="slot__weapon">${e.skin ? tierBadge(t) : ""}${esc(wd.name)}</span>
         <span class="slot__name">${esc(name)}</span>
-        ${e.chroma ? `<span class="slot__chroma">${esc(e.chroma.n)}</span>` : ""}
+        <span class="slot__chroma">${e.chroma ? esc(e.chroma.n) : "&nbsp;"}</span>
       </div></${tag}>`;
   }
 
@@ -244,9 +250,9 @@
     const start = Math.max(0, chromas.findIndex((c) => c.id && c.id === chromaId));
     const dlg = $("#detail");
     $("#detailIn").innerHTML = `<button class="detail__close" type="button" aria-label="Fechar" data-close>×</button>
-      <div class="detail__art" style="--tier:${esc(t.color)}" id="detailArt">${art(chromas[start]?.i || s.i, s.n, s.id + "d")}</div>
+      <div class="stage detail__art" style="--tier:${esc(t.color)}" id="detailArt">${art(chromas[start]?.i || s.i, s.n, s.id + "d")}</div>
       <div class="detail__body">
-        <div><p class="eyebrow" style="color:${esc(t.color)}">${esc(t.name)}</p><h2 id="detailName">${esc(s.n)}</h2></div>
+        <div><p class="eyebrow detail__tier" style="--tier:${esc(t.color)}">${tierBadge(t)}${esc(t.name)}</p><h2 id="detailName">${esc(s.n)}</h2></div>
         <div class="detail__meta"><span>${esc(weaponOf(s))}</span><span>${(s.l || []).length} ${(s.l || []).length === 1 ? "nível" : "níveis"}</span><span>${chromas.length || 1} ${chromas.length > 1 ? "variações de cor" : "variação"}</span></div>
         ${chromas.length > 1 ? `<div><p class="eyebrow">Variações</p><div class="swatches">${chromas.map((c, i) => `<button class="swatch" type="button" data-chroma="${i}" aria-pressed="${i === start}" title="${esc(c.n)}" aria-label="${esc(c.n)}">${typeof c.s === "string" ? `<img src="${esc(c.s)}" alt="" loading="lazy">` : `<span style="display:block;width:100%;height:100%;background:linear-gradient(135deg,${esc(c.i.a)},${esc(c.i.b)})"></span>`}</button>`).join("")}</div></div>` : ""}
       </div>`;
@@ -264,6 +270,10 @@
   function tick() {
     const now = Date.now();
     $$("[data-clock]").forEach((el) => { const end = state.deadlines[el.dataset.clock]; if (end) el.textContent = hms(end - now); });
+    $$("[data-bar]").forEach((el) => {
+      const end = state.deadlines[el.dataset.bar];
+      if (end) el.style.width = `${Math.min(100, Math.max(0, 100 - ((end - now) / 864e5) * 100)).toFixed(2)}%`;
+    });
   }
   setInterval(tick, 1000);
 

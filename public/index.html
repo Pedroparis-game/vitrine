@@ -81,16 +81,16 @@
   <!-- APP -->
   <section id="viewApp" hidden>
     <nav class="tabs" role="tablist" aria-label="Seções">
-      <button role="tab" data-tab="loja" aria-selected="true">Loja do dia</button>
+      <button role="tab" data-tab="loja" aria-selected="true">Loja<span class="long"> do dia</span></button>
       <button role="tab" data-tab="pacote">Pacote</button>
-      <button role="tab" data-tab="noturno" id="tabNight">Mercado Noturno</button>
+      <button role="tab" data-tab="noturno" id="tabNight"><span class="long">Mercado </span>Noturno</button>
       <button role="tab" data-tab="colecao">Coleção</button>
     </nav>
 
     <div class="panel" id="panel-loja" role="tabpanel">
       <div class="panel__head">
-        <h2>Loja do dia</h2>
-        <div class="sign"><span>Renova em</span><b class="clock" data-clock="daily">--:--:--</b></div>
+        <div><h2>Loja do dia</h2><p class="count" id="dailySum"></p></div>
+        <div class="sign"><span>Renova em</span><b class="clock" data-clock="daily">--:--:--</b><i class="sign__bar" aria-hidden="true"><b data-bar="daily"></b></i></div>
       </div>
       <div class="tags tags--4" id="dailyGrid"></div>
     </div>
