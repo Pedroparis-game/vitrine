@@ -159,7 +159,7 @@ textarea { font: 500 13px/1.4 var(--f-mono); resize: vertical; }
   .tags--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
   .tags--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 }
-.tags--small { grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr)); gap: 12px; }
+.tags--small { grid-template-columns: repeat(auto-fill, minmax(min(100%, 138px), 1fr)); gap: 10px; }
 
 .tag {
   --tier: #8a94a3;
@@ -225,7 +225,7 @@ textarea { font: 500 13px/1.4 var(--f-mono); resize: vertical; }
 .inv { display: grid; gap: 22px; }
 .inv__cat h4 { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font: 600 11px/1 var(--f-body); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
 .inv__cat h4::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.inv__grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr)); }
+.inv__grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 138px), 1fr)); }
 .slot { --tier: #8a94a3; display: flex; flex-direction: column; min-width: 0; padding: 0; text-align: left; cursor: pointer;
   background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
   transition: transform .2s ease, border-color .2s ease; }
